@@ -4,6 +4,7 @@ use_inline_resources
 
 action :auto_attach do # ~FC017 https://github.com/acrmp/foodcritic/issues/387
   package 'mdadm'
+  package 'xfsprogs'
 
   # Set node['aws']['raid'] = {} if it doesn't already exist
   node.normal['aws']['raid'] ||= {}
@@ -400,7 +401,7 @@ def create_raid_disks(mount_point, mount_point_owner, mount_point_group, mount_p
         when 'ext4'
           system("mke2fs -t #{filesystem} -F #{md_device}")
         when 'xfs'
-          system("mkfs -t #{filesystem} -F #{md_device}")
+          system("mkfs.xfs #{md_device}")
         else
           # TODO: fill in details on how to format other filesystems here
           Chef::Log.info("Can't format filesystem #{filesystem}. Only ext4 or xfs currently supported.")
