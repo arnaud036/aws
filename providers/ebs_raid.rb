@@ -379,10 +379,18 @@ def create_raid_disks(mount_point, mount_point_owner, mount_point_group, mount_p
   Chef::Log.info("finished sorting devices #{devices_string}")
 
   if !creating_from_snapshot && !existing_raid
+
+    case filesystem
+      when 'xfs'
+        chunk_size = 256
+      else
+        chunk_size = 512
+    end
+
     # Create the raid device on our system
     execute 'creating raid device' do
       Chef::Log.info("creating raid device /dev/#{raid_dev} with raid devices #{devices_string}")
-      command "[ -b /dev/#{raid_dev} ] && mdadm --stop /dev/#{raid_dev} ; yes | mdadm --create /dev/#{raid_dev} --level=#{level} --raid-devices=#{devices.size} #{devices_string}"
+      command "[ -b /dev/#{raid_dev} ] && mdadm --stop /dev/#{raid_dev} ; yes | mdadm --create /dev/#{raid_dev} --level=#{level} --chunk=#{chunk_size} --raid-devices=#{devices.size} #{devices_string}"
     end
 
     # NOTE: must be a better way.
